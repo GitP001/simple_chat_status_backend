@@ -1,4 +1,4 @@
-# simple_chat_status_backend# simple_chat_status_backend
+# simple_chat_status_backend
 
 Backend for the simpleChat status plugin. Stores and serves user availability statuses.
 

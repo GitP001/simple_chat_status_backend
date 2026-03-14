@@ -7,9 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ---------------------------------------------------------------------------
-// MongoDB connection
-// ---------------------------------------------------------------------------
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/simple_chat_status';
 const PORT = process.env.PORT || 3001;
 
@@ -21,9 +18,6 @@ mongoose
     process.exit(1);
   });
 
-// ---------------------------------------------------------------------------
-// Schema
-// ---------------------------------------------------------------------------
 const statusSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true, unique: true },
@@ -36,16 +30,10 @@ const statusSchema = new mongoose.Schema(
 
 const Status = mongoose.model('Status', statusSchema);
 
-// ---------------------------------------------------------------------------
-// Routes
-// ---------------------------------------------------------------------------
-
-// Health check
 app.get('/', (req, res) => {
   res.json({ status: 'ok', service: 'simple_chat_status_backend' });
 });
 
-// PUT /status/:userId — set or update status
 app.put('/status/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -68,7 +56,6 @@ app.put('/status/:userId', async (req, res) => {
   }
 });
 
-// GET /status/:userId — get one user's status
 app.get('/status/:userId', async (req, res) => {
   try {
     const status = await Status.findOne({ userId: req.params.userId });
@@ -84,7 +71,6 @@ app.get('/status/:userId', async (req, res) => {
   }
 });
 
-// DELETE /status/:userId — clear status
 app.delete('/status/:userId', async (req, res) => {
   try {
     await Status.findOneAndDelete({ userId: req.params.userId });
@@ -95,7 +81,6 @@ app.delete('/status/:userId', async (req, res) => {
   }
 });
 
-// GET /statuses — all users' statuses
 app.get('/statuses', async (req, res) => {
   try {
     const statuses = await Status.find().sort({ updatedAt: -1 });
@@ -106,9 +91,6 @@ app.get('/statuses', async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// Start
-// ---------------------------------------------------------------------------
 app.listen(PORT, () => {
   console.log(`Status backend running on http://localhost:${PORT}`);
 });

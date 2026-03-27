@@ -18,9 +18,11 @@ mongoose
     process.exit(1);
   });
 
+
 const statusSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true, unique: true },
+    username: { type: String, default: '' },
     value: { type: String, required: true },
     label: { type: String, default: '' },
     color: { type: String, default: '#9E9E9E' },
@@ -30,6 +32,7 @@ const statusSchema = new mongoose.Schema(
 
 const Status = mongoose.model('Status', statusSchema);
 
+
 app.get('/', (req, res) => {
   res.json({ status: 'ok', service: 'simple_chat_status_backend' });
 });
@@ -37,7 +40,7 @@ app.get('/', (req, res) => {
 app.put('/status/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const { value, label, color } = req.body;
+    const { value, label, color, username } = req.body;
 
     if (!value) {
       return res.status(400).json({ error: 'value is required' });
@@ -45,7 +48,12 @@ app.put('/status/:userId', async (req, res) => {
 
     const status = await Status.findOneAndUpdate(
       { userId },
-      { value, label: label || value, color: color || '#9E9E9E' },
+      {
+        value,
+        label: label || value,
+        color: color || '#9E9E9E',
+        username: username || '',
+      },
       { upsert: true, new: true, runValidators: true }
     );
 
@@ -61,7 +69,7 @@ app.get('/status/:userId', async (req, res) => {
     const status = await Status.findOne({ userId: req.params.userId });
 
     if (!status) {
-      return res.json({ userId: req.params.userId, value: null, label: '', color: '' });
+      return res.json({ userId: req.params.userId, value: null, label: '', color: '', username: '' });
     }
 
     res.json(status);
@@ -74,7 +82,7 @@ app.get('/status/:userId', async (req, res) => {
 app.delete('/status/:userId', async (req, res) => {
   try {
     await Status.findOneAndDelete({ userId: req.params.userId });
-    res.json({ userId: req.params.userId, value: null, label: '', color: '' });
+    res.json({ userId: req.params.userId, value: null, label: '', color: '', username: '' });
   } catch (err) {
     console.error('DELETE /status error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -90,6 +98,7 @@ app.get('/statuses', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Status backend running on http://localhost:${PORT}`);
